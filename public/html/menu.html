@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Zombie Arena Online - Menu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-900 flex items-center justify-center h-screen">
+    <div class="bg-gray-800 p-8 rounded-lg shadow-lg w-96 text-center">
+        <h1 class="text-3xl font-bold text-green-400 mb-6">Zombie Arena Online</h1>
+
+        <input id="nickname" type="text" placeholder="Enter your nickname..."
+            class="w-full p-2 mb-4 rounded bg-gray-700 text-white placeholder-gray-400 focus:outline-none" />
+
+        <input id="roomId" type="text" placeholder="Enter your room id..."
+            class="w-full p-2 mb-6 rounded bg-gray-700 text-white placeholder-gray-400 focus:outline-none" />
+
+        <button id="playBtn" class="w-full py-2 mb-4 bg-green-500 hover:bg-green-600 rounded text-white font-bold">
+            Play
+        </button>
+
+        <button id="exitBtn" class="w-full py-2 bg-red-500 hover:bg-red-600 rounded text-white font-bold">
+            Exit Game
+        </button>
+
+        <p id="errorMsg" class="text-red-400 mt-4 hidden">Please fill in both fields!</p>
+    </div>
+
+    <script type="module" src="../pages/menu.js"></script>
+</body>
+
+</html>
