@@ -1,7 +1,9 @@
 export class NetworkEngine {
-    constructor(localEngine, url = "ws://localhost:3000") {
+    constructor(localEngine) {
         this.localEngine = localEngine;
-        this.socket = new WebSocket(url);
+        const protocol = window.location.protocol === "https:" ? "wss" : "ws";
+        const host = window.location.host;
+        this.socket = new WebSocket(`${protocol}://${host}`);
         this.latency = null;
         this.pingInterval = null;
         this.playerId = null;
