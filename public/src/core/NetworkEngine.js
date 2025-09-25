@@ -1,5 +1,3 @@
-import { Optimization } from '../components/optimization.js';
-
 export class NetworkEngine {
     constructor(localEngine) {
         this.localEngine = localEngine;
@@ -119,27 +117,14 @@ export class NetworkEngine {
     }
 
     update() {
-        // Cập nhật trạng thái của player và bullet từ server
-        for (let id in this.otherPlayers) {
-            const p = this.otherPlayers[id];
-            const clientState = this.localEngine.player; // Trạng thái client
-            const serverState = p; // Trạng thái server
-
-            // Tính toán Interpolation cho mỗi player
-            const interpolationTime = 0.1; // Thời gian interpolation (có thể thay đổi tuỳ vào nhu cầu)
-            const optimization = new Optimization(clientState, serverState, interpolationTime);
-            this.otherPlayers[id] = optimization.applyInterpolation();
-        }
-
-        // Cập nhật trạng thái của bullets từ server
-        for (let i = 0; i < this.otherBullets.length; i++) {
-            const bullet = this.otherBullets[i];
-            const clientBullet = this.localEngine.bullets.list[i]; // Trạng thái bullet client
-            const serverBullet = bullet; // Trạng thái bullet server
-
-            // Tính toán Interpolation cho mỗi bullet
-            const optimization = new Optimization(clientBullet, serverBullet, interpolationTime);
-            this.otherBullets[i] = optimization.applyInterpolation();
+        // update other players' bullets
+        for (let i = this.otherBullets.length - 1; i >= 0; i--) {
+            const b = this.otherBullets[i];
+            b.x += b.dx;
+            b.y += b.dy;
+            if (b.x < 0 || b.x > this.localEngine.map.width || b.y < 0 || b.y > this.localEngine.map.height) {
+                this.otherBullets.splice(i, 1);
+            }
         }
     }
 
