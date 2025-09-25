@@ -10,7 +10,7 @@ export class LocalEngine {
         this.ctx = canvas.getContext("2d");
 
         this.map = new GameMap();
-        this.player = new Player(this.map.width / 2, this.map.height / 2);
+        this.player = new Player(this.map.width / 2, this.map.height / 2, true);
         this.camera = new Camera(this.player, canvas);
 
         this.bullets = {

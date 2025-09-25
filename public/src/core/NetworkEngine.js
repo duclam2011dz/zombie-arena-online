@@ -1,3 +1,8 @@
+// core/NetworkEngine.js
+import { Player } from "../components/player.js";
+
+const INTERPOLATION_DELAY = 100; // ms
+
 export class NetworkEngine {
     constructor(localEngine) {
         this.localEngine = localEngine;
@@ -25,17 +30,31 @@ export class NetworkEngine {
                     break;
 
                 case "state":
-                    this.otherPlayers = { ...data.players };
-                    delete this.otherPlayers[this.playerId];
+                    for (const id in data.players) {
+                        if (id === this.playerId) continue;
+                        if (!this.otherPlayers[id]) {
+                            this.otherPlayers[id] = new Player(data.players[id].x, data.players[id].y, false);
+                        }
+                        this.otherPlayers[id].addSnapshot({
+                            x: data.players[id].x,
+                            y: data.players[id].y,
+                            angle: data.players[id].angle,
+                            timestamp: data.serverTime
+                        });
+                    }
                     break;
 
                 case "playerMove":
                     if (data.id !== this.playerId) {
                         if (!this.otherPlayers[data.id]) {
-                            this.otherPlayers[data.id] = { x: data.x, y: data.y, angle: data.angle };
-                        } else {
-                            Object.assign(this.otherPlayers[data.id], data);
+                            this.otherPlayers[data.id] = new Player(data.x, data.y, false);
                         }
+                        this.otherPlayers[data.id].addSnapshot({
+                            x: data.x,
+                            y: data.y,
+                            angle: data.angle,
+                            timestamp: data.serverTime
+                        });
                     }
                     break;
 
@@ -55,8 +74,7 @@ export class NetworkEngine {
                     break;
 
                 case "pong":
-                    const now = Date.now();
-                    this.latency = now - data.clientTime;
+                    this.latency = Date.now() - data.clientTime;
                     this.updatePingUI();
                     break;
             }
@@ -117,6 +135,12 @@ export class NetworkEngine {
     }
 
     update() {
+        // update other players' interpolated states
+        const renderTimestamp = Date.now() - this.latency - INTERPOLATION_DELAY;
+        for (const id in this.otherPlayers) {
+            this.otherPlayers[id].updateInterpolated(renderTimestamp);
+        }
+
         // update other players' bullets
         for (let i = this.otherBullets.length - 1; i >= 0; i--) {
             const b = this.otherBullets[i];
@@ -131,15 +155,7 @@ export class NetworkEngine {
     draw(ctx, cam) {
         // draw other players
         for (const id in this.otherPlayers) {
-            const p = this.otherPlayers[id];
-            ctx.save();
-            ctx.translate(p.x - cam.x, p.y - cam.y);
-            ctx.rotate(p.angle);
-            ctx.fillStyle = "cyan";
-            ctx.fillRect(-10, -10, 20, 20);
-            ctx.fillStyle = "white";
-            ctx.fillRect(10, -5, 15, 10);
-            ctx.restore();
+            this.otherPlayers[id].draw(ctx, cam);
         }
 
         // draw bullets from other players
