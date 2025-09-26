@@ -35,6 +35,7 @@ export class Player {
     renderX: number;
     renderY: number;
     renderAngle: number;
+    nickname: string | undefined;
 
     constructor(x: number, y: number, isLocal = false) {
         this.x = x;

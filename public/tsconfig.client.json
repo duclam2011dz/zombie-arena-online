@@ -1,12 +1,10 @@
 {
     "compilerOptions": {
-        "target": "es2017",
+        "target": "ES2020",
         "module": "ESNext",
         "outDir": "./dist",
         "rootDir": ".",
         "strict": true,
-        "allowJs": true,
-        "checkJs": false,
         "moduleResolution": "node",
         "esModuleInterop": true,
         "forceConsistentCasingInFileNames": true,
