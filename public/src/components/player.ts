@@ -1,8 +1,43 @@
-// components/player.js
+// components/player.ts
 import { interpolateSnapshot } from "../utils/interpolation.js";
 
+export interface Snapshot {
+    x: number;
+    y: number;
+    angle: number;
+    timestamp: number;
+}
+
+interface InputHandler {
+    keys: Record<string, boolean>;
+}
+
+interface GameMap {
+    width: number;
+    height: number;
+}
+
+interface Camera {
+    x: number;
+    y: number;
+}
+
 export class Player {
-    constructor(x, y, isLocal = false) {
+    x: number;
+    y: number;
+    size: number;
+    speed: number;
+    angle: number;
+
+    isLocal: boolean;
+
+    stateBuffer: Snapshot[];
+    renderX: number;
+    renderY: number;
+    renderAngle: number;
+    nickname: string | undefined;
+
+    constructor(x: number, y: number, isLocal = false) {
         this.x = x;
         this.y = y;
         this.size = 20;
@@ -18,7 +53,7 @@ export class Player {
         this.renderAngle = 0;
     }
 
-    update(input, map) {
+    update(input: InputHandler, map: GameMap): void {
         if (!this.isLocal) return;
 
         if (input.keys["w"]) this.y -= this.speed;
@@ -31,7 +66,7 @@ export class Player {
         this.y = Math.max(this.size, Math.min(map.height - this.size, this.y));
     }
 
-    addSnapshot(snapshot) {
+    addSnapshot(snapshot: Snapshot): void {
         this.stateBuffer.push(snapshot);
 
         // Keep only last ~20 snapshots
@@ -40,7 +75,7 @@ export class Player {
         }
     }
 
-    updateInterpolated(renderTimestamp) {
+    updateInterpolated(renderTimestamp: number): void {
         if (this.isLocal) return;
 
         const state = interpolateSnapshot(this.stateBuffer, renderTimestamp);
@@ -57,7 +92,7 @@ export class Player {
         }
     }
 
-    draw(ctx, cam) {
+    draw(ctx: CanvasRenderingContext2D, cam: Camera): void {
         ctx.save();
         const drawX = this.isLocal ? this.x : this.renderX;
         const drawY = this.isLocal ? this.y : this.renderY;

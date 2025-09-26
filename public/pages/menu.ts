@@ -1,24 +1,29 @@
-const playBtn = document.getElementById("playBtn");
-const exitBtn = document.getElementById("exitBtn");
-const nicknameInput = document.getElementById("nickname");
-const roomIdInput = document.getElementById("roomId");
-const errorMsg = document.getElementById("errorMsg");
+const playBtn = document.getElementById("playBtn") as HTMLButtonElement;
+const exitBtn = document.getElementById("exitBtn") as HTMLButtonElement;
+const nicknameInput = document.getElementById("nickname") as HTMLInputElement;
+const roomIdInput = document.getElementById("roomId") as HTMLInputElement;
+const errorMsg = document.getElementById("errorMsg") as HTMLParagraphElement;
 
 // Modal elements
-const roomsBtn = document.getElementById("roomsBtn");
-const roomsModal = document.getElementById("roomsModal");
-const closeModal = document.getElementById("closeModal");
-const createRoomBtn = document.getElementById("createRoomBtn");
-const roomsList = document.getElementById("roomsList");
+const roomsBtn = document.getElementById("roomsBtn") as HTMLButtonElement;
+const roomsModal = document.getElementById("roomsModal") as HTMLDivElement;
+const closeModal = document.getElementById("closeModal") as HTMLButtonElement;
+const createRoomBtn = document.getElementById("createRoomBtn") as HTMLButtonElement;
+const roomsList = document.getElementById("roomsList") as HTMLDivElement;
+
+interface RoomInfo {
+    playersCount: number;
+    maxPlayers: number;
+}
 
 // fetch danh sách room
-async function fetchRooms() {
+async function fetchRooms(): Promise<Record<string, RoomInfo>> {
     const res = await fetch("/api/rooms");
     return res.json();
 }
 
 // Render room từ server
-function renderRooms(rooms) {
+function renderRooms(rooms: Record<string, RoomInfo>): void {
     roomsList.innerHTML = "";
     for (const [id, room] of Object.entries(rooms)) {
         const div = document.createElement("div");
@@ -37,7 +42,8 @@ function renderRooms(rooms) {
             </button>
         `;
 
-        div.querySelector(".joinBtn").addEventListener("click", () => {
+        const joinBtn = div.querySelector(".joinBtn") as HTMLButtonElement;
+        joinBtn.addEventListener("click", () => {
             if (room.playersCount >= room.maxPlayers) {
                 alert(`⚠️ Room #${id} is full!`);
                 return;
@@ -50,7 +56,7 @@ function renderRooms(rooms) {
     }
 }
 
-async function loadRooms() {
+async function loadRooms(): Promise<void> {
     const rooms = await fetchRooms();
     renderRooms(rooms);
 }
@@ -86,17 +92,17 @@ playBtn.addEventListener("click", async () => {
 
 // Exit button
 exitBtn.addEventListener("click", () => {
-    window.open("", "_self").close();
+    window.open("", "_self")?.close();
 });
 
 let modalOpen = false;
-let refreshInterval = null;
+let refreshInterval: number | null = null;
 
 // Modal open/close with animation
-function openModalWithAnim() {
+function openModalWithAnim(): void {
     roomsModal.classList.remove("pointer-events-none");
     roomsModal.classList.add("opacity-100");
-    const modalBox = roomsModal.querySelector("div");
+    const modalBox = roomsModal.querySelector("div") as HTMLDivElement;
     modalBox.classList.remove("scale-90");
     modalBox.classList.add("scale-100");
 
@@ -104,20 +110,19 @@ function openModalWithAnim() {
     loadRooms();
 
     if (!refreshInterval) {
-        refreshInterval = setInterval(() => {
+        refreshInterval = window.setInterval(() => {
             if (modalOpen) loadRooms();
         }, 3000);
     }
 }
 
-function closeModalWithAnim() {
-    const modalBox = roomsModal.querySelector("div");
+function closeModalWithAnim(): void {
+    const modalBox = roomsModal.querySelector("div") as HTMLDivElement;
     modalBox.classList.remove("scale-100");
     modalBox.classList.add("scale-90");
     roomsModal.classList.remove("opacity-100");
     roomsModal.classList.add("opacity-0");
 
-    // disable pointer events after animation ends
     modalOpen = false;
     setTimeout(() => {
         roomsModal.classList.add("pointer-events-none");
@@ -137,22 +142,22 @@ createRoomBtn.addEventListener("click", async () => {
         body: JSON.stringify({ roomId, maxPlayers: 10 }),
     });
     const data = await res.json();
-    if (data.error) {
-        alert("❌ " + data.error);
+    if ((data as any).error) {
+        alert("❌ " + (data as any).error);
     } else {
         await loadRooms(); // reload list
     }
 });
 
 // Close modal with ESC key
-document.addEventListener("keydown", (e) => {
+document.addEventListener("keydown", (e: KeyboardEvent) => {
     if (e.key === "Escape") {
         closeModalWithAnim();
     }
 });
 
 // Close modal when click outside box
-roomsModal.addEventListener("click", (e) => {
+roomsModal.addEventListener("click", (e: MouseEvent) => {
     if (e.target === roomsModal) {
         closeModalWithAnim();
     }

@@ -1,5 +1,18 @@
+// public/src/utils/input.ts
+
+import { Player } from "../components/player.js";
+
 export class Input {
-    constructor(canvas, player, bullets, networkEngine) {
+    keys: Record<string, boolean>;
+    mouseX: number;
+    mouseY: number;
+
+    constructor(
+        canvas: HTMLCanvasElement,
+        player: Player,
+        bullets: { spawn: (x: number, y: number, angle: number) => void },
+        networkEngine?: { sendShoot: (x: number, y: number, angle: number) => void }
+    ) {
         this.keys = {};
         this.mouseX = 0;
         this.mouseY = 0;

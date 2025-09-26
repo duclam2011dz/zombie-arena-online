@@ -1,13 +1,29 @@
+// core/LocalEngine.js
 import { Player } from "../components/player.js";
 import { Bullet } from "../components/bullet.js";
 import { GameMap } from "../utils/map.js";
 import { Camera } from "../utils/camera.js";
 import { Input } from "../utils/input.js";
+import type { NetworkEngine } from "./NetworkEngine.js";
 
 export class LocalEngine {
-    constructor(canvas, networkEngine = null) {
+    canvas: HTMLCanvasElement;
+    ctx: CanvasRenderingContext2D;
+    map: GameMap;
+    player: Player;
+    camera: Camera;
+    bullets: {
+        list: Bullet[];
+        spawn: (x: number, y: number, angle: number) => void;
+        update: () => void;
+        draw: (ctx: CanvasRenderingContext2D, cam: { x: number; y: number }) => void;
+    };
+    networkEngine: NetworkEngine | null;
+    input: Input;
+
+    constructor(canvas: HTMLCanvasElement, networkEngine: NetworkEngine | null) {
         this.canvas = canvas;
-        this.ctx = canvas.getContext("2d");
+        this.ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
 
         this.map = new GameMap();
         this.player = new Player(this.map.width / 2, this.map.height / 2, true);
@@ -15,7 +31,7 @@ export class LocalEngine {
 
         this.bullets = {
             list: [],
-            spawn: (x, y, angle) => {
+            spawn: (x: number, y: number, angle: number) => {
                 this.bullets.list.push(new Bullet(x, y, angle));
             },
             update: () => {
@@ -31,18 +47,18 @@ export class LocalEngine {
         };
 
         this.networkEngine = networkEngine;
-        this.input = new Input(canvas, this.player, this.bullets, this.networkEngine);
+        this.input = new Input(canvas, this.player, this.bullets, networkEngine || undefined);
 
         window.addEventListener("resize", () => this.resizeCanvas());
         this.resizeCanvas();
     }
 
-    resizeCanvas() {
+    resizeCanvas(): void {
         this.canvas.width = window.innerWidth;
         this.canvas.height = window.innerHeight;
     }
 
-    update() {
+    update(): void {
         this.player.update(this.input, this.map);
 
         const cam = this.camera.getPosition();
@@ -59,7 +75,7 @@ export class LocalEngine {
         }
     }
 
-    draw() {
+    draw(): void {
         const cam = this.camera.getPosition();
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.map.draw(this.ctx, cam);
@@ -71,13 +87,13 @@ export class LocalEngine {
         }
     }
 
-    loop() {
+    loop(): void {
         this.update();
         this.draw();
         requestAnimationFrame(() => this.loop());
     }
 
-    start() {
+    start(): void {
         this.loop();
     }
 }

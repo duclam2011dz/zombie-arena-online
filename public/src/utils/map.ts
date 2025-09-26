@@ -1,11 +1,17 @@
+// public/src/utils/map.ts
+
 export class GameMap {
+    width: number;
+    height: number;
+    gridSize: number;
+
     constructor(width = 2000, height = 2000, gridSize = 50) {
         this.width = width;
         this.height = height;
         this.gridSize = gridSize;
     }
 
-    draw(ctx, cam) {
+    draw(ctx: CanvasRenderingContext2D, cam: { x: number; y: number }): void {
         ctx.strokeStyle = "#222";
         ctx.lineWidth = 1;
 

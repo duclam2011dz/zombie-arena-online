@@ -1,13 +1,13 @@
 import { LocalEngine } from "./core/LocalEngine.js";
 import { NetworkEngine } from "./core/NetworkEngine.js";
 
-const canvas = document.getElementById("gameCanvas");
+const canvas = document.getElementById("gameCanvas") as HTMLCanvasElement;
 
-let networkEngine;
-let localEngine;
+let networkEngine: NetworkEngine;
+let localEngine: LocalEngine;
 
-function startGame() {
-    networkEngine = new NetworkEngine(null); // init first
+function startGame(): void {
+    networkEngine = new NetworkEngine(null as any); // init first
     localEngine = new LocalEngine(canvas, networkEngine);
     networkEngine.localEngine = localEngine; // link back
 
