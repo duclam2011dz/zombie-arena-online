@@ -9,7 +9,7 @@
 </head>
 
 <body class="bg-gray-900 flex items-center justify-center h-screen">
-    <div class="bg-gray-800 p-8 rounded-lg shadow-lg w-96 text-center">
+    <div class="bg-gray-800 p-8 rounded-lg shadow-lg w-96 text-center relative">
         <h1 class="text-3xl font-bold text-green-400 mb-6">Zombie Arena Online</h1>
 
         <input id="nickname" type="text" placeholder="Enter your nickname..."
@@ -22,11 +22,40 @@
             Play
         </button>
 
+        <button id="roomsBtn" class="w-full py-2 mb-4 bg-blue-500 hover:bg-blue-600 rounded text-white font-bold">
+            Rooms List
+        </button>
+
         <button id="exitBtn" class="w-full py-2 bg-red-500 hover:bg-red-600 rounded text-white font-bold">
             Exit Game
         </button>
 
         <p id="errorMsg" class="text-red-400 mt-4 hidden">Please fill in both fields!</p>
+    </div>
+
+    <!-- Modal -->
+    <div id="roomsModal"
+        class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
+        <div
+            class="bg-gray-800 rounded-lg shadow-lg w-[500px] relative transform scale-90 transition-transform duration-300">
+            <!-- Header -->
+            <div class="flex justify-between items-center p-4 border-b border-gray-700">
+                <h2 class="text-xl font-bold text-green-400">Rooms List</h2>
+                <button id="closeModal" class="text-gray-400 hover:text-white text-2xl font-bold">&times;</button>
+            </div>
+
+            <!-- Room list -->
+            <div class="p-4 space-y-3 max-h-72 overflow-y-auto" id="roomsList">
+                <!-- Fake rooms (rendered by JS for Join handler binding) -->
+            </div>
+
+            <!-- Footer -->
+            <div class="p-4 border-t border-gray-700 flex justify-end">
+                <button id="createRoomBtn" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded font-bold">
+                    Create Room
+                </button>
+            </div>
+        </div>
     </div>
 
     <script type="module" src="../pages/menu.js"></script>
