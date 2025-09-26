@@ -1,3 +1,4 @@
+// core/LocalEngine.js
 import { Player } from "../components/player.js";
 import { Bullet } from "../components/bullet.js";
 import { GameMap } from "../utils/map.js";
@@ -5,7 +6,7 @@ import { Camera } from "../utils/camera.js";
 import { Input } from "../utils/input.js";
 
 export class LocalEngine {
-    constructor(canvas, networkEngine = null) {
+    constructor(canvas, networkEngine) {
         this.canvas = canvas;
         this.ctx = canvas.getContext("2d");
 

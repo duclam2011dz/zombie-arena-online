@@ -1,5 +1,6 @@
 # Node modules
 server/node_modules/
+public/node_modules/
 
 # Logs
 *.log
