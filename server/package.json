@@ -4,6 +4,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
+    "postinstall": "cd ../public && npm install && npm run build",
     "start": "node index.js",
     "dev": "nodemon index.js"
   },
