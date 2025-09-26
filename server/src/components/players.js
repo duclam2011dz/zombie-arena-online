@@ -1,20 +1,25 @@
-const players = {};
+// server/src/components/players.js
+// giữ lại API wrapper để không phải sửa quá nhiều ở NetworkEngine
+// nhưng thực chất toàn bộ logic đi qua RoomManager
 
-export function addPlayer(id) {
-    players[id] = { x: 100, y: 100, angle: 0 };
-    return players[id];
+let roomManagerInstance = null;
+
+export function setRoomManager(rm) {
+    roomManagerInstance = rm;
 }
 
-export function updatePlayer(id, x, y, angle) {
-    if (players[id]) {
-        players[id] = { x, y, angle };
-    }
+export function addPlayer(roomId, playerId, ws) {
+    return roomManagerInstance.joinRoom(roomId, playerId, ws);
 }
 
-export function removePlayer(id) {
-    delete players[id];
+export function updatePlayer(roomId, playerId, x, y, angle) {
+    roomManagerInstance.updatePlayer(roomId, playerId, x, y, angle);
 }
 
-export function getPlayers() {
-    return players;
+export function removePlayer(roomId, playerId, ws) {
+    roomManagerInstance.leaveRoom(roomId, playerId, ws);
+}
+
+export function getPlayers(roomId) {
+    return roomManagerInstance.getPlayers(roomId);
 }

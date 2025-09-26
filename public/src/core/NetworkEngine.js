@@ -12,12 +12,23 @@ export class NetworkEngine {
         this.latency = null;
         this.pingInterval = null;
         this.playerId = null;
+        this.roomId = null;
 
         this.otherPlayers = {};
         this.otherBullets = [];
 
+        // lấy từ sessionStorage
+        this.nickname = sessionStorage.getItem("nickname") || "Anonymous";
+        this.selectedRoomId = sessionStorage.getItem("roomId") || "default";
+
         this.socket.addEventListener("open", () => {
             console.log("Connected to server");
+            // gửi joinRoom ngay khi connect
+            this.send({
+                type: "joinRoom",
+                roomId: this.selectedRoomId,
+                nickname: this.nickname
+            });
             this.startPing();
         });
 
@@ -27,6 +38,8 @@ export class NetworkEngine {
             switch (data.type) {
                 case "init":
                     this.playerId = data.id;
+                    this.roomId = data.roomId;
+                    console.log(`Joined room ${this.roomId} as ${this.playerId}`);
                     break;
 
                 case "state":
@@ -35,12 +48,14 @@ export class NetworkEngine {
                         if (!this.otherPlayers[id]) {
                             this.otherPlayers[id] = new Player(data.players[id].x, data.players[id].y, false);
                         }
-                        this.otherPlayers[id].addSnapshot({
+                        const p = this.otherPlayers[id];
+                        p.addSnapshot({
                             x: data.players[id].x,
                             y: data.players[id].y,
                             angle: data.players[id].angle,
                             timestamp: data.serverTime
                         });
+                        p.nickname = data.players[id].nickname || "???";
                     }
                     break;
 
@@ -49,12 +64,14 @@ export class NetworkEngine {
                         if (!this.otherPlayers[data.id]) {
                             this.otherPlayers[data.id] = new Player(data.x, data.y, false);
                         }
-                        this.otherPlayers[data.id].addSnapshot({
+                        const p = this.otherPlayers[data.id];
+                        p.addSnapshot({
                             x: data.x,
                             y: data.y,
                             angle: data.angle,
                             timestamp: data.serverTime
                         });
+                        p.nickname = data.nickname || "???";
                     }
                     break;
 
@@ -76,6 +93,10 @@ export class NetworkEngine {
                 case "pong":
                     this.latency = Date.now() - data.clientTime;
                     this.updatePingUI();
+                    break;
+
+                case "error":
+                    alert(data.message);
                     break;
             }
         });
@@ -121,7 +142,8 @@ export class NetworkEngine {
             id: this.playerId,
             x: this.localEngine.player.x,
             y: this.localEngine.player.y,
-            angle: this.localEngine.player.angle
+            angle: this.localEngine.player.angle,
+            nickname: this.nickname
         });
     }
 
@@ -155,7 +177,23 @@ export class NetworkEngine {
     draw(ctx, cam) {
         // draw other players
         for (const id in this.otherPlayers) {
-            this.otherPlayers[id].draw(ctx, cam);
+            const p = this.otherPlayers[id];
+            p.draw(ctx, cam);
+
+            // draw nickname
+            ctx.fillStyle = "white";
+            ctx.font = "12px Arial";
+            ctx.textAlign = "center";
+            ctx.fillText(p.nickname || "???", p.renderX - cam.x, p.renderY - cam.y + 30);
+        }
+
+        // vẽ nickname của chính mình
+        if (this.localEngine.player) {
+            const self = this.localEngine.player;
+            ctx.fillStyle = "cyan";
+            ctx.font = "12px Arial";
+            ctx.textAlign = "center";
+            ctx.fillText(this.nickname || "Me", self.x - cam.x, self.y - cam.y + 30);
         }
 
         // draw bullets from other players

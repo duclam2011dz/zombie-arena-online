@@ -11,55 +11,52 @@ const closeModal = document.getElementById("closeModal");
 const createRoomBtn = document.getElementById("createRoomBtn");
 const roomsList = document.getElementById("roomsList");
 
-const fakeRooms = [
-    { id: "1234", players: 2, max: 10 },
-    { id: "5678", players: 0, max: 10 },
-    { id: "9999", players: 8, max: 10 },
-    { id: "4242", players: 10, max: 10 },
-];
-
-// Helper: chọn màu cho player count
-function getPlayerCountColor(players, max) {
-    if (players <= 3) return "text-green-400"; // ít người
-    if (players <= 7) return "text-yellow-400"; // trung bình
-    if (players >= max - 2) return "text-red-400"; // gần đầy
-    return "text-gray-400"; // fallback
+// fetch danh sách room
+async function fetchRooms() {
+    const res = await fetch("/api/rooms");
+    return res.json();
 }
 
-// Render fake rooms
-function renderRooms() {
+// Render room từ server
+function renderRooms(rooms) {
     roomsList.innerHTML = "";
-    fakeRooms.forEach((room) => {
+    for (const [id, room] of Object.entries(rooms)) {
         const div = document.createElement("div");
         div.className = "flex justify-between items-center bg-gray-700 rounded p-3";
 
-        const colorClass = getPlayerCountColor(room.players, room.max);
+        let colorClass = "text-gray-400";
+        if (room.playersCount <= 3) colorClass = "text-green-400";
+        else if (room.playersCount <= 7) colorClass = "text-yellow-400";
+        else if (room.playersCount >= room.maxPlayers - 2) colorClass = "text-red-400";
 
         div.innerHTML = `
-            <span class="text-white">Room #${room.id}</span>
-            <span class="${colorClass}">${room.players}/${room.max}</span>
+            <span class="text-white">Room #${id}</span>
+            <span class="${colorClass}">${room.playersCount}/${room.maxPlayers}</span>
             <button class="ml-4 px-3 py-1 bg-green-500 hover:bg-green-600 text-white rounded font-bold joinBtn">
                 Join
             </button>
         `;
 
-        // Join button handler
         div.querySelector(".joinBtn").addEventListener("click", () => {
-            if (room.players >= room.max) {
-                alert(`⚠️ Room #${room.id} is full! Cannot join.`);
+            if (room.playersCount >= room.maxPlayers) {
+                alert(`⚠️ Room #${id} is full!`);
                 return;
             }
-            roomIdInput.value = room.id; // auto fill
-            closeModalWithAnim(); // close modal
+            roomIdInput.value = id; // auto fill input
+            closeModalWithAnim();
         });
 
         roomsList.appendChild(div);
-    });
+    }
 }
-renderRooms();
+
+async function loadRooms() {
+    const rooms = await fetchRooms();
+    renderRooms(rooms);
+}
 
 // Play button
-playBtn.addEventListener("click", () => {
+playBtn.addEventListener("click", async () => {
     const nickname = nicknameInput.value.trim();
     const roomId = roomIdInput.value.trim();
 
@@ -68,7 +65,18 @@ playBtn.addEventListener("click", () => {
         return;
     }
 
-    // Lưu nickname + roomId tạm vào sessionStorage (sau này game lấy ra dùng)
+    // check room tồn tại trước khi join
+    const rooms = await fetchRooms();
+    if (!rooms[roomId]) {
+        alert(`❌ Room ${roomId} does not exist`);
+        return;
+    }
+    if (rooms[roomId].playersCount >= rooms[roomId].maxPlayers) {
+        alert(`⚠️ Room ${roomId} is full!`);
+        return;
+    }
+
+    // Lưu nickname + roomId tạm vào sessionStorage
     sessionStorage.setItem("nickname", nickname);
     sessionStorage.setItem("roomId", roomId);
 
@@ -81,6 +89,9 @@ exitBtn.addEventListener("click", () => {
     window.open("", "_self").close();
 });
 
+let modalOpen = false;
+let refreshInterval = null;
+
 // Modal open/close with animation
 function openModalWithAnim() {
     roomsModal.classList.remove("pointer-events-none");
@@ -88,6 +99,15 @@ function openModalWithAnim() {
     const modalBox = roomsModal.querySelector("div");
     modalBox.classList.remove("scale-90");
     modalBox.classList.add("scale-100");
+
+    modalOpen = true;
+    loadRooms();
+
+    if (!refreshInterval) {
+        refreshInterval = setInterval(() => {
+            if (modalOpen) loadRooms();
+        }, 3000);
+    }
 }
 
 function closeModalWithAnim() {
@@ -98,6 +118,7 @@ function closeModalWithAnim() {
     roomsModal.classList.add("opacity-0");
 
     // disable pointer events after animation ends
+    modalOpen = false;
     setTimeout(() => {
         roomsModal.classList.add("pointer-events-none");
     }, 300);
@@ -107,8 +128,20 @@ function closeModalWithAnim() {
 roomsBtn.addEventListener("click", openModalWithAnim);
 closeModal.addEventListener("click", closeModalWithAnim);
 
-createRoomBtn.addEventListener("click", () => {
-    alert("Create Room feature coming soon!");
+// Create Room
+createRoomBtn.addEventListener("click", async () => {
+    const roomId = Math.random().toString(36).substr(2, 6);
+    const res = await fetch("/api/rooms", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ roomId, maxPlayers: 10 }),
+    });
+    const data = await res.json();
+    if (data.error) {
+        alert("❌ " + data.error);
+    } else {
+        await loadRooms(); // reload list
+    }
 });
 
 // Close modal with ESC key
