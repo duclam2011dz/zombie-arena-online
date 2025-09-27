@@ -1,18 +1,31 @@
 # 📜 Changelog - Zombie Arena Online
 
-## [1.1.5] - 2025-10-xx
+## [1.1.5] - 2025-9-xx
+
 ### Added
+
 - **TypeScript build setup cho server**:
   - Thêm `server/tsconfig.server.json` với `ESNext module`.
-  - Bật `allowJs`, tắt `checkJs` để migrate dần từ JS → TS.
-  - Thêm script `npm run build` trong `server/package.json` (build ra `server/dist`).
   - Cài đặt sẵn `@types` cho `chalk`, `express`, `uuid`, `ws`.
-
 - **Root package.json**:
   - Thêm script `build:client`, `build:server`, `start:server`, `build` (build toàn bộ dự án từ root).
 
+### Changed
+
+- **Server code đã migrate 100% sang TypeScript**:
+  - `index.ts`, `RoomManager.ts`, `NetworkEngine.ts`, `players.ts`, `roomAPI.ts`, `logging.ts`, `wsWrapper.ts`.
+  - Toàn bộ server chạy với import/export chuẩn ESNext.
+- **Build output**: tất cả file server sau khi build nằm trong `dist/src/...` thay vì `dist/...`.
+- **TypeScript config**:
+  - Tắt `allowJs`, `checkJs` (không còn code JS).
+  - Bật các rule nghiêm ngặt hơn: `strictNullChecks`, `noImplicitAny`, `noUnusedLocals`, `noUnusedParameters`, `noImplicitReturns`.
+
+---
+
 ## [1.1] - 2025-09-27
+
 ### Added
+
 - **Room system**: tạo/join room, rooms list, chặn join khi room full.
 - **Interpolation**: chuyển động mượt mà hơn khi latency cao.
 - **Nickname hiển thị** dưới player và sync từ server.
@@ -26,7 +39,9 @@
 ---
 
 ## [1.0] - 2025-09-25
+
 ### Added
+
 - **Multiplayer realtime** với raw WebSocket.
 - **Player movement + shooting** (local bullets sync lên server).
 - **Basic state sync** (x, y, angle).

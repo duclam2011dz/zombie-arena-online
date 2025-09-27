@@ -3,9 +3,9 @@ import { createServer } from "http";
 import path from "path";
 import { fileURLToPath } from "url";
 
-import { NetworkEngine } from "./src/core/NetworkEngine.js";
-import { createRoomAPI } from "./src/utils/roomAPI.js";
-import { logInfo } from "./src/utils/logging.js";
+import { NetworkEngine } from "./core/NetworkEngine";
+import { createRoomAPI } from "./utils/roomAPI";
+import { logInfo } from "./utils/logging";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
