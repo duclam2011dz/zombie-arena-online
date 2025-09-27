@@ -3,7 +3,7 @@
 // nhưng thực chất toàn bộ logic đi qua RoomManager
 
 import WebSocket from "ws";
-import { RoomManager, PlayerState } from "../core/RoomManager";
+import { RoomManager, PlayerState } from "../core/RoomManager.js";
 
 let roomManagerInstance: RoomManager | null = null;
 

@@ -1,6 +1,6 @@
 // server/src/core/RoomManager.js
 import WebSocket from "ws";
-import { sendJSON, broadcastJSON } from "../utils/wsWrapper";
+import { sendJSON, broadcastJSON } from "../utils/wsWrapper.js";
 
 export interface PlayerState {
     x: number;

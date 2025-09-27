@@ -1,7 +1,7 @@
 import { WebSocketServer, WebSocket } from "ws";
 import { v4 as uuidv4 } from "uuid";
-import { RoomManager } from "./RoomManager";
-import { logInfo, logSuccess, logWarn } from "../utils/logging";
+import { RoomManager } from "./RoomManager.js";
+import { logInfo, logSuccess, logWarn } from "../utils/logging.js";
 
 interface ExtWebSocket extends WebSocket {
     id?: string;

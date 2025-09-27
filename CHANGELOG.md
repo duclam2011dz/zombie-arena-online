@@ -14,11 +14,16 @@
 
 - **Server code đã migrate 100% sang TypeScript**:
   - `index.ts`, `RoomManager.ts`, `NetworkEngine.ts`, `players.ts`, `roomAPI.ts`, `logging.ts`, `wsWrapper.ts`.
-  - Toàn bộ server chạy với import/export chuẩn ESNext.
-- **Build output**: tất cả file server sau khi build nằm trong `dist/src/...` thay vì `dist/...`.
+  - Toàn bộ server chạy với import/export chuẩn NodeNext.
+- **Build output**: server build vào `dist/src/...`.
 - **TypeScript config**:
   - Tắt `allowJs`, `checkJs` (không còn code JS).
   - Bật các rule nghiêm ngặt hơn: `strictNullChecks`, `noImplicitAny`, `noUnusedLocals`, `noUnusedParameters`, `noImplicitReturns`.
+
+### Fixed
+
+- Sửa handler Express trong `roomAPI.ts` để hợp lệ với strict mode.
+- Sửa `index.ts` để resolve đúng `public` path sau khi build (`../../..`), tránh lỗi 404 khi serve static HTML.
 
 ---
 
