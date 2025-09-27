@@ -1,5 +1,16 @@
 # 📜 Changelog - Zombie Arena Online
 
+## [1.1.5] - 2025-10-xx
+### Added
+- **TypeScript build setup cho server**:
+  - Thêm `server/tsconfig.server.json` với `ESNext module`.
+  - Bật `allowJs`, tắt `checkJs` để migrate dần từ JS → TS.
+  - Thêm script `npm run build` trong `server/package.json` (build ra `server/dist`).
+  - Cài đặt sẵn `@types` cho `chalk`, `express`, `uuid`, `ws`.
+
+- **Root package.json**:
+  - Thêm script `build:client`, `build:server`, `start:server`, `build` (build toàn bộ dự án từ root).
+
 ## [1.1] - 2025-09-27
 ### Added
 - **Room system**: tạo/join room, rooms list, chặn join khi room full.
