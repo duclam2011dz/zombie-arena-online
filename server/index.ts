@@ -1,7 +1,8 @@
-import express from "express";
+import express, { Request, Response } from "express";
 import { createServer } from "http";
 import path from "path";
 import { fileURLToPath } from "url";
+
 import { NetworkEngine } from "./src/core/NetworkEngine.js";
 import { createRoomAPI } from "./src/utils/roomAPI.js";
 import { logInfo } from "./src/utils/logging.js";
@@ -15,7 +16,7 @@ const server = createServer(app);
 
 // Serve static
 app.use(express.static(path.join(__dirname, "../public")));
-app.get("/", (req, res) => {
+app.get("/", (_req: Request, res: Response) => {
     res.sendFile(path.join(__dirname, "../public/html/menu.html"));
 });
 
