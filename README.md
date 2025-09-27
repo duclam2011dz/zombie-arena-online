@@ -1,7 +1,26 @@
 # 🧟 Zombie Arena Online
 
-Một web game bắn zombie **top-down 2D** dạng multiplayer được xây dựng bằng **HTML, Tailwind CSS, JavaScript** cho client và **Node.js, Express.js, WebSocket (raw)** cho server.  
+**Zombie Arena Online** là một web game bắn zombie **top-down 2D** dạng multiplayer realtime được xây dựng bằng **HTML, Tailwind CSS, TypeScript** cho client và **Node.js, Express.js, WebSocket (raw)** cho server.
 Dự án được tổ chức theo phong cách module-based cả client và server để dễ dàng mở rộng và maintain.
+
+---
+
+## 🚀 Phiên bản mới nhất: v1.1
+
+### 🔑 Các tính năng chính
+- Multiplayer realtime với **WebSocket** (server-side bằng Node.js + Express).
+- **Room system**:
+  - Người chơi có thể tạo/join room bằng nickname.
+  - Rooms list hiển thị số lượng người chơi theo thời gian thực.
+  - Chặn join nếu room đã full (10/10).
+- **Interpolation**: giảm lag, di chuyển mượt mà hơn khi có latency.
+- Nickname hiển thị trực tiếp dưới mỗi player.
+- Ping indicator (màu xanh/vàng/đỏ theo độ trễ).
+- UI/UX:
+  - Menu với modal Rooms List (ESC/click outside để đóng).
+  - Auto điền room id khi Join.
+  - Fake rooms demo để skeleton UI.
+- **Client đã migrate 100% sang TypeScript** để dễ maintain.
 
 ---
 
@@ -9,8 +28,8 @@ Dự án được tổ chức theo phong cách module-based cả client và serv
 
 ### Client
 - **HTML5 Canvas**: render bản đồ, player, bullet.
-- **Tailwind CSS**: styling nhanh, gọn, chuẩn Gen Z.
-- **JavaScript (ES Module)**: logic gameplay, local engine, network engine.
+- **Tailwind CSS (CDN)**: styling nhanh, gọn.
+- **TypeScript**: logic gameplay, local engine, network engine.
 - **SessionStorage**: lưu tạm nickname & room id từ menu.
 
 ### Server
@@ -18,95 +37,113 @@ Dự án được tổ chức theo phong cách module-based cả client và serv
 - **WebSocket (ws)**: xử lý realtime multiplayer.
 - **uuid**: tạo player id duy nhất.
 - **chalk**: in log màu mè, dễ debug.
+- **RoomManager**: quản lý phòng chơi.
 
 ---
 
-## 📂 Workspace
+## 📂 Workspace (v1.1)
 
 ```
 📂public
- ┃ ┣ 📂html
- ┃ ┃ ┣ 📜index.html
- ┃ ┃ ┗ 📜menu.html
- ┃ ┣ 📂pages
- ┃ ┃ ┗ 📜menu.js
- ┃ ┗ 📂src
- ┃ ┃ ┣ 📂components
- ┃ ┃ ┃ ┣ 📜bullet.js
- ┃ ┃ ┃ ┗ 📜player.js
- ┃ ┃ ┣ 📂core
- ┃ ┃ ┃ ┣ 📜LocalEngine.js
- ┃ ┃ ┃ ┗ 📜NetworkEngine.js
- ┃ ┃ ┣ 📂utils
- ┃ ┃ ┃ ┣ 📜camera.js
- ┃ ┃ ┃ ┣ 📜input.js
- ┃ ┃ ┃ ┗ 📜map.js
- ┃ ┃ ┗ 📜game.js
+┣ 📂dist
+┃ ┣ 📂pages
+┃ ┃ ┣ 📜menu.js
+┃ ┃ ┗ 📜menu.js.map
+┃ ┗ 📂src
+┃ ┃ ┣ 📂components
+┃ ┃ ┃ ┣ 📜bullet.js
+┃ ┃ ┃ ┣ 📜bullet.js.map
+┃ ┃ ┃ ┣ 📜player.js
+┃ ┃ ┃ ┗ 📜player.js.map
+┃ ┃ ┣ 📂core
+┃ ┃ ┃ ┣ 📜LocalEngine.js
+┃ ┃ ┃ ┣ 📜LocalEngine.js.map
+┃ ┃ ┃ ┣ 📜NetworkEngine.js
+┃ ┃ ┃ ┗ 📜NetworkEngine.js.map
+┃ ┃ ┣ 📂utils
+┃ ┃ ┃ ┣ 📜camera.js
+┃ ┃ ┃ ┣ 📜camera.js.map
+┃ ┃ ┃ ┣ 📜input.js
+┃ ┃ ┃ ┣ 📜input.js.map
+┃ ┃ ┃ ┣ 📜interpolation.js
+┃ ┃ ┃ ┣ 📜interpolation.js.map
+┃ ┃ ┃ ┣ 📜map.js
+┃ ┃ ┃ ┗ 📜map.js.map
+┃ ┃ ┣ 📜game.js
+┃ ┃ ┗ 📜game.js.map
+┣ 📂html
+┃ ┣ 📜index.html
+┃ ┗ 📜menu.html
+┣ 📂pages
+┃ ┗ 📜menu.ts
+┣ 📂src
+┃ ┣ 📂components
+┃ ┃ ┣ 📜bullet.ts
+┃ ┃ ┗ 📜player.ts
+┃ ┣ 📂core
+┃ ┃ ┣ 📜LocalEngine.ts
+┃ ┃ ┗ 📜NetworkEngine.ts
+┃ ┣ 📂utils
+┃ ┃ ┣ 📜camera.ts
+┃ ┃ ┣ 📜input.ts
+┃ ┃ ┣ 📜interpolation.ts
+┃ ┃ ┗ 📜map.ts
+┃ ┗ 📜game.ts
+┣ 📜package-lock.json
+┣ 📜package.json
+┗ 📜tsconfig.client.json
 📂server
- ┣ 📂src 
- ┃ ┃ ┣ 📂components
- ┃ ┃ ┃ ┗ 📜players.js
- ┃ ┃ ┣ 📂core
- ┃ ┃ ┃ ┗ 📜NetworkEngine.js
- ┃ ┃ ┗ 📂utils
- ┃ ┃ ┃ ┣ 📜logging.js
- ┃ ┃ ┃ ┗ 📜wsWrapper.js
- ┃ ┣ 📜index.js
- ┃ ┣ 📜package-lock.json
- ┃ ┗ 📜package.json
+┣ 📂src
+┃ ┣ 📂components
+┃ ┃ ┗ 📜players.js
+┃ ┣ 📂core
+┃ ┃ ┣ 📜NetworkEngine.js
+┃ ┃ ┗ 📜RoomManager.js
+┃ ┗ 📂utils
+┃ ┃ ┣ 📜logging.js
+┃ ┃ ┣ 📜roomAPI.js
+┃ ┃ ┗ 📜wsWrapper.js
+┣ 📜index.js
+┣ 📜package-lock.json
+┗ 📜package.json
+📜.gitignore
+📜README.md
 ```
-
----
-
-## ✅ Ưu điểm
-- Codebase **module hóa**, dễ maintain, dễ scale.  
-- **Client–server tách biệt rõ ràng**, sync realtime qua WebSocket.  
-- Có **menu UI** (nickname, room id, play/exit).  
-- **Ping indicator** realtime (ms + màu theo độ lag).  
-- Logging có màu bằng **chalk** giúp dễ theo dõi server.  
-- Dùng **sessionStorage** để lưu tạm data → reset khi reload tab.
-
-## ⚠️ Nhược điểm
-- Chưa có **zombie AI** (mới chỉ player sync).  
-- Tạm thời chưa có **room management** (tất cả player chung 1 pool).  
-- Chưa có cơ chế **anti-cheat** hay validate mạnh từ server.  
-- Map/grid còn đơn giản, chưa có vật cản hay tile-based logic.
-
-## 🔧 Điểm cần cải tiến
-- Tách `rooms.js` để quản lý nhiều phòng chơi (theo roomId).  
-- Thêm entity zombie, item, skill.  
-- Tối ưu sync state (giảm payload, dùng snapshot diff).  
-- Thêm build tool (Vite/Webpack) thay vì load file ES module trực tiếp.  
-- Deploy production (pm2, nginx reverse proxy).
 
 ---
 
 ## ▶️ Cách chạy dự án
 
 1. Clone repo về máy.  
-2. Cài đặt dependencies (vào thư mục `server/`):  
+2. Cài đặt dependencies cho client:
    ```bash
-   cd server
+   cd public
+   npm install
+   npm run build
+   ```
+3. Cài đặt dependencies cho server:
+   ```bash
+   cd ../server
    npm install
    ```
-3. Chạy server:  
-   ```bash
+4. Chạy server:
+   ```
    npm start
    ```
-4. Mở trình duyệt:  
+5. Mở trình duyệt:
    ```
    http://localhost:3000
    ```
-5. Bạn sẽ thấy **menu screen** → nhập nickname + room id → nhấn **Play** → vào game.  
+6. Bạn sẽ thấy **menu screen** → nhập nickname + room id (hoặc tạo room) → nhấn **Play** → vào game.  
 
 ---
 
-## 🧪 Demo Features
-- Di chuyển bằng **WASD**, bắn bằng **chuột trái**.  
-- Player sync realtime qua server.  
-- Ping hiển thị ở góc phải dưới.  
-- Nút **Exit Game** trong menu để thoát tab (hoặc báo message nếu browser chặn).  
+## 🧭 Roadmap v1.1.5
+- Migrate server code sang TypeScript.
+- Thêm joystick support cho mobile.
+- Tích hợp ads system.
+- Clean up & optimize room logic.
 
 ---
 
-💡 Đây là **phiên bản đầu tiên (MVP)**, đủ để backup và tiếp tục scale trong tương lai.
+📌 Changelog: các phiên bản cũ (ví dụ v1.0) được lưu tại CHANGELOG.md.
