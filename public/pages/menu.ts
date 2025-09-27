@@ -162,3 +162,28 @@ roomsModal.addEventListener("click", (e: MouseEvent) => {
         closeModalWithAnim();
     }
 });
+
+function toggleBanners(): void {
+    const leftBanner = document.getElementById("banner-left") as HTMLDivElement;
+    const rightBanner = document.getElementById("banner-right") as HTMLDivElement;
+
+    // Show banners (fade in)
+    leftBanner.classList.remove("opacity-0", "pointer-events-none");
+    leftBanner.classList.add("opacity-100");
+    rightBanner.classList.remove("opacity-0", "pointer-events-none");
+    rightBanner.classList.add("opacity-100");
+
+    // Hide after 10s (fade out)
+    setTimeout(() => {
+        leftBanner.classList.remove("opacity-100");
+        leftBanner.classList.add("opacity-0", "pointer-events-none");
+        rightBanner.classList.remove("opacity-100");
+        rightBanner.classList.add("opacity-0", "pointer-events-none");
+    }, 10000);
+
+    // Repeat every 30s
+    setTimeout(toggleBanners, 30000);
+}
+
+// Start loop after page load
+window.addEventListener("load", toggleBanners);
