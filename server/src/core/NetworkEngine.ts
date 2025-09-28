@@ -2,6 +2,7 @@ import { WebSocketServer, WebSocket } from "ws";
 import { v4 as uuidv4 } from "uuid";
 import { RoomManager } from "./RoomManager.js";
 import { logInfo, logSuccess, logWarn } from "../utils/logging.js";
+import { ZombieManager } from "./ZombieManager.js";
 
 interface ExtWebSocket extends WebSocket {
     id?: string;
@@ -16,11 +17,13 @@ interface ClientMessage {
 export class NetworkEngine {
     private wss: WebSocketServer;
     public roomManager: RoomManager;
+    private zombieManager: ZombieManager;
 
     constructor(server: any) {
         this.wss = new WebSocketServer({ server });
         this.roomManager = new RoomManager();
-        (global as any).roomManager = this.roomManager;
+        this.zombieManager = new ZombieManager(this.roomManager);
+        (global as any).zombieManager = this.zombieManager;
 
         this.wss.on("connection", (ws: ExtWebSocket) => {
             const id = uuidv4();
@@ -132,6 +135,7 @@ export class NetworkEngine {
                 const state = {
                     type: "state",
                     players: this.roomManager.getPlayers(roomId),
+                    zombies: this.zombieManager.getZombies(roomId),
                     serverTime: Date.now(),
                 };
                 this.roomManager.broadcastToRoom(roomId, state);

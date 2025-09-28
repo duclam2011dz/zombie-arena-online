@@ -1,5 +1,6 @@
 // core/NetworkEngine.js
 import { Player } from "../components/player.js";
+import { Zombie } from "../components/zombies.js";
 
 const INTERPOLATION_DELAY = 100; // ms
 
@@ -21,6 +22,7 @@ export class NetworkEngine {
     otherBullets: BulletState[];
     nickname: string;
     selectedRoomId: string;
+    otherZombies: Record<string, Zombie>;
 
     constructor(localEngine: any) {
         this.localEngine = localEngine;
@@ -34,6 +36,7 @@ export class NetworkEngine {
 
         this.otherPlayers = {};
         this.otherBullets = [];
+        this.otherZombies = {};
 
         this.nickname = sessionStorage.getItem("nickname") || "Anonymous";
         this.selectedRoomId = sessionStorage.getItem("roomId") || "default";
@@ -59,6 +62,7 @@ export class NetworkEngine {
                     break;
 
                 case "state":
+                    // Update other players
                     for (const id in data.players) {
                         if (id === this.playerId) continue;
                         if (!this.otherPlayers[id]) {
@@ -72,6 +76,19 @@ export class NetworkEngine {
                             timestamp: data.serverTime
                         });
                         p.nickname = data.players[id].nickname || "???";
+                    }
+
+                    // Update zombies
+                    for (const zid in data.zombies) {
+                        if (!this.otherZombies[zid]) {
+                            this.otherZombies[zid] = new Zombie(zid, data.zombies[zid].x, data.zombies[zid].y, data.zombies[zid].hp);
+                        }
+                        this.otherZombies[zid].addSnapshot({
+                            x: data.zombies[zid].x,
+                            y: data.zombies[zid].y,
+                            hp: data.zombies[zid].hp,
+                            timestamp: data.serverTime
+                        });
                     }
                     break;
 
@@ -178,6 +195,10 @@ export class NetworkEngine {
             this.otherPlayers[id].updateInterpolated(renderTimestamp);
         }
 
+        for (const zid in this.otherZombies) {
+            this.otherZombies[zid].updateInterpolated(renderTimestamp);
+        }
+
         for (let i = this.otherBullets.length - 1; i >= 0; i--) {
             const b = this.otherBullets[i];
             b.x += b.dx;
@@ -200,6 +221,10 @@ export class NetworkEngine {
             ctx.font = "12px Arial";
             ctx.textAlign = "center";
             ctx.fillText(p.nickname || "???", p.renderX - cam.x, p.renderY - cam.y + 30);
+        }
+
+        for (const zid in this.otherZombies) {
+            this.otherZombies[zid].draw(ctx, cam);
         }
 
         if (this.localEngine.player) {
