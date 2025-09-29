@@ -10,7 +10,6 @@ export class Input {
     constructor(
         canvas: HTMLCanvasElement,
         player: Player,
-        bullets: { spawn: (x: number, y: number, angle: number) => void },
         networkEngine?: { sendShoot: (x: number, y: number, angle: number) => void }
     ) {
         this.keys = {};
@@ -26,7 +25,6 @@ export class Input {
         });
 
         canvas.addEventListener("mousedown", () => {
-            bullets.spawn(player.x, player.y, player.angle);
             if (networkEngine) {
                 networkEngine.sendShoot(player.x, player.y, player.angle);
             }

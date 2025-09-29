@@ -43,15 +43,43 @@ export class Zombie {
         }
     }
 
+    checkBulletCollision(bullets: any[]): void {
+        for (let i = bullets.length - 1; i >= 0; i--) {
+            const b = bullets[i];
+            const dx = b.x - this.renderX;
+            const dy = b.y - this.renderY;
+            const dist2 = dx * dx + dy * dy;
+
+            if (dist2 < 20 * 20) {
+                this.hp -= 10;
+                if (this.hp <= 0) {
+                    this.hp = 0;
+                }
+                bullets.splice(i, 1);
+                break;
+            }
+        }
+    }
+
     draw(ctx: CanvasRenderingContext2D, cam: { x: number; y: number }): void {
+        // zombie body
         ctx.fillStyle = "green";
         ctx.beginPath();
         ctx.arc(this.renderX - cam.x, this.renderY - cam.y, 15, 0, Math.PI * 2);
         ctx.fill();
 
+        // health bar background
+        const barWidth = 30;
+        const barHeight = 5;
+        const barX = this.renderX - cam.x - barWidth / 2;
+        const barY = this.renderY - cam.y - 30;
+
         ctx.fillStyle = "red";
-        ctx.font = "12px Arial";
-        ctx.textAlign = "center";
-        ctx.fillText(`HP:${this.hp}`, this.renderX - cam.x, this.renderY - cam.y - 20);
+        ctx.fillRect(barX, barY, barWidth, barHeight);
+
+        // health foreground
+        ctx.fillStyle = "lime";
+        const hpRatio = Math.max(this.hp, 0) / 100;
+        ctx.fillRect(barX, barY, barWidth * hpRatio, barHeight);
     }
 }

@@ -3,6 +3,7 @@ import WebSocket from "ws";
 import { sendJSON, broadcastJSON } from "../utils/wsWrapper.js";
 
 export interface PlayerState {
+    bullets: any;
     x: number;
     y: number;
     angle: number;
@@ -43,7 +44,7 @@ export class RoomManager {
         if (room.players.size >= room.maxPlayers) {
             return null; // full
         }
-        room.players.set(playerId, { x: 100, y: 100, angle: 0, nickname });
+        room.players.set(playerId, { x: 100, y: 100, angle: 0, nickname, bullets: [] });
         room.sockets.add(ws);
         ws.roomId = roomId;
         return room.players.get(playerId)!;

@@ -1,15 +1,9 @@
-// core/NetworkEngine.js
+// public/src/core/NetworkEngine.js
 import { Player } from "../components/player.js";
 import { Zombie } from "../components/zombies.js";
+import { Bullet } from "../components/bullet.js";
 
 const INTERPOLATION_DELAY = 100; // ms
-
-interface BulletState {
-    x: number;
-    y: number;
-    dx: number;
-    dy: number;
-}
 
 export class NetworkEngine {
     localEngine: any;
@@ -19,7 +13,7 @@ export class NetworkEngine {
     playerId: string | null;
     roomId: string | null;
     otherPlayers: Record<string, Player>;
-    otherBullets: BulletState[];
+    otherBullets: Record<string, Bullet>;
     nickname: string;
     selectedRoomId: string;
     otherZombies: Record<string, Zombie>;
@@ -35,7 +29,7 @@ export class NetworkEngine {
         this.roomId = null;
 
         this.otherPlayers = {};
-        this.otherBullets = [];
+        this.otherBullets = {};
         this.otherZombies = {};
 
         this.nickname = sessionStorage.getItem("nickname") || "Anonymous";
@@ -90,6 +84,36 @@ export class NetworkEngine {
                             timestamp: data.serverTime
                         });
                     }
+
+                    // cleanup zombies không còn trong state
+                    for (const zid in this.otherZombies) {
+                        if (!data.zombies[zid]) {
+                            delete this.otherZombies[zid];
+                        }
+                    }
+
+                    // 🔥 Bullets
+                    const serverBullets = data.bullets || [];
+
+                    // cập nhật hoặc tạo mới
+                    for (const b of serverBullets) {
+                        if (!this.otherBullets[b.id]) {
+                            this.otherBullets[b.id] = new Bullet(b.id, b.x, b.y, b.dx, b.dy, b.angle);
+                        }
+                        this.otherBullets[b.id].addSnapshot({
+                            x: b.x,
+                            y: b.y,
+                            angle: b.angle,
+                            timestamp: data.serverTime,
+                        });
+                    }
+
+                    // xoá bullet không còn tồn tại trên server
+                    for (const id in this.otherBullets) {
+                        if (!serverBullets.find((b: any) => b.id === id)) {
+                            delete this.otherBullets[id];
+                        }
+                    }
                     break;
 
                 case "playerMove":
@@ -105,17 +129,6 @@ export class NetworkEngine {
                             timestamp: data.serverTime
                         });
                         p.nickname = data.nickname || "???";
-                    }
-                    break;
-
-                case "playerShoot":
-                    if (data.id !== this.playerId) {
-                        this.otherBullets.push({
-                            x: data.x,
-                            y: data.y,
-                            dx: Math.cos(data.angle) * 7,
-                            dy: Math.sin(data.angle) * 7
-                        });
                     }
                     break;
 
@@ -195,20 +208,12 @@ export class NetworkEngine {
             this.otherPlayers[id].updateInterpolated(renderTimestamp);
         }
 
-        for (const zid in this.otherZombies) {
-            this.otherZombies[zid].updateInterpolated(renderTimestamp);
+        for (const id in this.otherBullets) {
+            this.otherBullets[id].update(renderTimestamp);
         }
 
-        for (let i = this.otherBullets.length - 1; i >= 0; i--) {
-            const b = this.otherBullets[i];
-            b.x += b.dx;
-            b.y += b.dy;
-            if (
-                b.x < 0 || b.x > this.localEngine.map.width ||
-                b.y < 0 || b.y > this.localEngine.map.height
-            ) {
-                this.otherBullets.splice(i, 1);
-            }
+        for (const zid in this.otherZombies) {
+            this.otherZombies[zid].updateInterpolated(renderTimestamp);
         }
     }
 
@@ -235,11 +240,8 @@ export class NetworkEngine {
             ctx.fillText(this.nickname || "Me", self.x - cam.x, self.y - cam.y + 30);
         }
 
-        ctx.fillStyle = "orange";
-        this.otherBullets.forEach((b) => {
-            ctx.beginPath();
-            ctx.arc(b.x - cam.x, b.y - cam.y, 5, 0, Math.PI * 2);
-            ctx.fill();
-        });
+        for (const id in this.otherBullets) {
+            this.otherBullets[id].draw(ctx, cam);
+        }
     }
 }

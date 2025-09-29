@@ -18,14 +18,27 @@ export class ZombieManager {
         // Spawn loop
         setInterval(() => {
             for (const [roomId] of this.roomManager.rooms) {
+                const pos = this.randomSpawnPosition(2000, 2000);
                 this.spawnZombie(roomId, {
                     id: `z_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
-                    x: Math.random() * 800,
-                    y: Math.random() * 600,
+                    x: pos.x,
+                    y: pos.y,
                     hp: 100,
                 });
             }
         }, 5000);
+    }
+
+    private randomSpawnPosition(mapWidth: number, mapHeight: number): { x: number; y: number } {
+        const side = Math.floor(Math.random() * 4); // 0=top,1=right,2=bottom,3=left
+        const margin = 20;
+        switch (side) {
+            case 0: return { x: Math.random() * mapWidth, y: margin }; // top
+            case 1: return { x: mapWidth - margin, y: Math.random() * mapHeight }; // right
+            case 2: return { x: Math.random() * mapWidth, y: mapHeight - margin }; // bottom
+            case 3: return { x: margin, y: Math.random() * mapHeight }; // left
+            default: return { x: 0, y: 0 };
+        }
     }
 
     spawnZombie(roomId: string, zombie: ZombieState): void {

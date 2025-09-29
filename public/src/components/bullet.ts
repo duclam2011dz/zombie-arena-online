@@ -1,39 +1,61 @@
 // components/bullet.ts
+import { interpolateSnapshot, Snapshot } from "../utils/interpolation.js";
+import { predictPosition } from "../utils/prediction.js";
 
 export class Bullet {
+    id: string;
     x: number;
     y: number;
     dx: number;
     dy: number;
-    radius: number;
+    angle: number;
+    width: number;
+    height: number;
+    snapshots: Snapshot[];
+    visible: boolean;
 
-    constructor(x: number, y: number, angle: number, speed = 7) {
+    constructor(id: string, x: number, y: number, dx: number, dy: number, angle: number) {
+        this.id = id;
         this.x = x;
         this.y = y;
-        this.dx = Math.cos(angle) * speed;
-        this.dy = Math.sin(angle) * speed;
-        this.radius = 5;
+        this.dx = dx;
+        this.dy = dy;
+        this.angle = angle;
+        this.width = 12;   // viên đạn hình chữ nhật
+        this.height = 4;
+        this.snapshots = [];
+        this.visible = false;
     }
 
-    /**
-     * Update bullet position.
-     * @param map game map with width/height
-     * @returns true if bullet is out of map
-     */
-    update(map: { width: number; height: number }): boolean {
-        this.x += this.dx;
-        this.y += this.dy;
+    addSnapshot(snapshot: Snapshot): void {
+        this.snapshots.push(snapshot);
+        if (this.snapshots.length >= 2) {
+            this.visible = true;
+        }
+        if (this.snapshots.length > 10) this.snapshots.shift();
+    }
 
-        return (
-            this.x < 0 || this.x > map.width ||
-            this.y < 0 || this.y > map.height
-        );
+    update(renderTimestamp: number): void {
+        if (this.snapshots.length < 2) {
+            // chưa có đủ dữ liệu → đợi, không vẽ
+            return;
+        }
+
+        const interp = interpolateSnapshot(this.snapshots, renderTimestamp);
+        if (interp) {
+            this.x = interp.x;
+            this.y = interp.y;
+            this.angle = interp.angle;
+        }
     }
 
     draw(ctx: CanvasRenderingContext2D, cam: { x: number; y: number }): void {
-        ctx.fillStyle = "red";
-        ctx.beginPath();
-        ctx.arc(this.x - cam.x, this.y - cam.y, this.radius, 0, Math.PI * 2);
-        ctx.fill();
+        if (!this.visible) return;
+        ctx.save();
+        ctx.translate(this.x - cam.x, this.y - cam.y);
+        ctx.rotate(this.angle);
+        ctx.fillStyle = "yellow";
+        ctx.fillRect(-this.width / 2, -this.height / 2, this.width, this.height);
+        ctx.restore();
     }
 }

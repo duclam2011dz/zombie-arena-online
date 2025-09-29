@@ -1,3 +1,4 @@
+// server/src/core/NetworkEngine.js
 import { WebSocketServer, WebSocket } from "ws";
 import { v4 as uuidv4 } from "uuid";
 import { RoomManager } from "./RoomManager.js";
@@ -104,15 +105,30 @@ export class NetworkEngine {
 
                 if (data.type === "playerShoot") {
                     const player = this.roomManager.getPlayers(ws.roomId!)[id];
-                    this.roomManager.broadcastToRoom(
-                        ws.roomId!,
-                        {
-                            ...data,
-                            nickname: player.nickname,
-                            serverTime: Date.now(),
-                        },
-                        id
-                    );
+                    if (!player.bullets) player.bullets = [];
+
+                    const speed = 15;
+                    const dx = Math.cos(data.angle) * speed;
+                    const dy = Math.sin(data.angle) * speed;
+
+                    const playerSize = 20;
+                    const bulletLength = 12;
+                    const offset = playerSize / 2 + bulletLength / 2;
+
+                    const spawnX = data.x + Math.cos(data.angle) * offset;
+                    const spawnY = data.y + Math.sin(data.angle) * offset;
+
+                    player.bullets.push({
+                        id: crypto.randomUUID(),
+                        x: spawnX,
+                        y: spawnY,
+                        dx,
+                        dy,
+                        angle: data.angle,
+                        width: bulletLength,
+                        height: 4,
+                        owner: ws.id!,
+                    });
                     return;
                 }
             });
@@ -132,10 +148,46 @@ export class NetworkEngine {
 
         setInterval(() => {
             for (const [roomId] of this.roomManager.rooms) {
+                const players = this.roomManager.getPlayers(roomId);
+                const zombies = this.zombieManager.getZombies(roomId);
+                const bullets = Object.values(players).flatMap(p => p.bullets || []);
+
+                // Collision bullet ↔ zombie
+                for (const pid in players) {
+                    const p = players[pid];
+                    if (!p.bullets) continue;
+
+                    for (let i = p.bullets.length - 1; i >= 0; i--) {
+                        const b = p.bullets[i];
+                        b.x += b.dx;
+                        b.y += b.dy;
+
+                        for (const zid in zombies) {
+                            const z = zombies[zid];
+                            const dx = b.x - z.x;
+                            const dy = b.y - z.y;
+                            const dist2 = dx * dx + dy * dy;
+
+                            if (dist2 < 20 * 20) {
+                                this.zombieManager.updateZombie(roomId, zid, { hp: z.hp - 10 });
+
+                                if (z.hp - 10 <= 0) {
+                                    this.zombieManager.removeZombie(roomId, zid);
+                                }
+
+                                p.bullets.splice(i, 1);
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                // 🔥 Broadcast state (players + zombies)
                 const state = {
                     type: "state",
-                    players: this.roomManager.getPlayers(roomId),
-                    zombies: this.zombieManager.getZombies(roomId),
+                    players,
+                    zombies,
+                    bullets,
                     serverTime: Date.now(),
                 };
                 this.roomManager.broadcastToRoom(roomId, state);
